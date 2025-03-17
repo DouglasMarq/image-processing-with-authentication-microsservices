@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: images-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: images-service
+  template:
+    metadata:
+      labels:
+        app: images-service
+    spec:
+      containers:
+        - name: images-service-container
+          imagePullPolicy: Never
+          image: douglasmarq/images-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://host.minikube.internal:5432/database"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "host.minikube.internal:9092"
+            - name: AWS_ENDPOINT
+              value: "host.minikube.internal:4566"

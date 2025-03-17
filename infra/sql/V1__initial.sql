@@ -1,0 +1,14 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE users (
+    id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name VARCHAR(64) NOT NULL,
+    email VARCHAR(128) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    plan VARCHAR(20) NOT NULL DEFAULT 'BASIC',
+    quotas INTEGER NOT NULL DEFAULT 10,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_users_email ON users (email)

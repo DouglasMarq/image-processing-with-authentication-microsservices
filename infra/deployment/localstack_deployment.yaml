@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: localstack
+spec:
+  type: ExternalName
+  externalName: host.minikube.internal
+  ports:
+    - name: port
+      port: 4566

@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: ImageService
+  kafka:
+    consumer:
+      enable-auto-commit: true
+      group-id: image-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    group-id: image-service
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    template:
+      default-topic: local-images-topic
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/database}
+    username: ${SPRING_DATASOURCE_USERNAME:username}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximumPoolSize: 5
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+          fetch_size: 100
+        temp:
+          use_jdbc_metadata_defaults: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    path: /api-docs
+
+aws:
+  s3:
+    endpoint: ${AWS_ENDPOINT:http://localhost:4566}
+    region: us-east-1
+    access-key: test
+    secret-key: test
+    bucket-name: local-images
+
+image-service:
+  api:
+    nginx:
+      url: ${NGINX_URL:http://localhost:80}

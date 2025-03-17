@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bff-service
+  template:
+    metadata:
+      labels:
+        app: bff-service
+    spec:
+      containers:
+        - name: bff-service-container
+          imagePullPolicy: Never
+          image: douglasmarq/bff-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://host.minikube.internal:5432/database"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "host.minikube.internal:9092"

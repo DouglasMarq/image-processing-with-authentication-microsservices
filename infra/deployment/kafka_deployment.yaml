@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kafka
+spec:
+  type: ExternalName
+  externalName: host.minikube.internal
+  ports:
+    - name: port
+      port: 9092

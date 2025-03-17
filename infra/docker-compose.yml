@@ -1,0 +1,99 @@
+services:
+  db:
+    container_name: 'postgresqlWithCronjob'
+    environment:
+      POSTGRES_DB: database
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      network: host
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  zookeeper:
+    image: 'confluentinc/cp-zookeeper:7.9.0'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - default
+
+  kafka:
+    image: 'confluentinc/cp-kafka:7.9.0'
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    expose:
+      - "29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://host.minikube.internal:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - default
+
+  init-kafka:
+    image: 'confluentinc/cp-kafka:7.9.0'
+    depends_on:
+      - kafka
+    entrypoint: [ '/bin/sh', '-c']
+    command: |
+      "
+      kafka-topics --bootstrap-server kafka:29092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic local-images-topic --replication-factor 1 --partitions 1
+
+      kafka-topics --bootstrap-server kafka:29092 --list
+      "
+
+  localstack:
+    image: 'localstack/localstack:4.2.0'
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-1
+      - AWS_DEFAULT_REGION=us-east-1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - "./localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  flyway:
+    image: 'flyway/flyway:11.4.0-alpine'
+    command: -url=jdbc:postgresql://db:5432/database -schemas=public -user=username -password=password -connectRetries=50 migrate
+    networks:
+      - default
+    volumes:
+      - .:/flyway/sql
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:1.27.4
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    driver: bridge
