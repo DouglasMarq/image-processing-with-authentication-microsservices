@@ -21,6 +21,10 @@ spec:
           env:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://host.minikube.internal:5432/database"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "username"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "password"
             - name: SENDGRID_API_KEY
               value: "api_key"
             - name: EMAIL_SENDER

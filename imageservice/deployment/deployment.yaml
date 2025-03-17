@@ -21,7 +21,13 @@ spec:
           env:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://host.minikube.internal:5432/database"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "username"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "password"
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "host.minikube.internal:9092"
             - name: AWS_ENDPOINT
               value: "host.minikube.internal:4566"
+            - name: NGINX_URL
+              value: "http://localhost:80"

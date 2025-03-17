@@ -21,5 +21,11 @@ spec:
           env:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://host.minikube.internal:5432/database"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "username"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "password"
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "host.minikube.internal:9092"
+            - name: IMAGE_SERVICE_URL
+              value: "http://192.168.49.2:30082"
