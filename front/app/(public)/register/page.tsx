@@ -22,7 +22,7 @@ export default function Register() {
             throw new Error('Passwords do not match.');
         }
 
-        post('http://192.168.49.2:30080/v1/auth/login', payload)
+        post('http://192.168.49.2:30080/v1/register', payload)
         .then((res: AxiosResponse) => {
             if (res.status === 200) redirect('/');
         }).catch(error => {
@@ -35,7 +35,7 @@ export default function Register() {
         console.log('Password:', payload.password);
         console.log('confirmPassword:', payload.confirmPassword);
 
-        // If successful, possibly redirect somewhere:
+        redirect('/');
     }
 
     // Separate server action just to go back to the login page

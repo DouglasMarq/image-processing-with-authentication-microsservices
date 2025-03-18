@@ -39,6 +39,10 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://host.minikube.internal:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_MESSAGE_MAX_BYTES: 103809024
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 103809024
+      KAFKA_MAX_REQUEST_SIZE: 103809024
+      KAFKA_MAX_PARTITION_FETCH_BYTES: 103809024
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -54,7 +58,8 @@ services:
       kafka-topics --bootstrap-server kafka:29092 --list
 
       echo -e 'Creating kafka topics'
-      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic local-images-topic --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic local-images-topic --replication-factor 1 --partitions 1 --config max.message.bytes=103809024
+
 
       kafka-topics --bootstrap-server kafka:29092 --list
       "
