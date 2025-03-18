@@ -4,19 +4,16 @@ import java.util.*;
 
 public final class Anonymizer {
 
-    private Anonymizer() {
-        // Private constructor to prevent instantiation
-    }
+    private Anonymizer() {}
 
-    private static final List<String> KEYS_TO_SUPPRESS = List.of("email");
+    private static final List<String> KEYSTOSUPPRESS = List.of("email");
 
-    private static final List<String> KEYS_TO_CENSOR = List.of("email");
+    private static final List<String> KEYSTOCENSOR = List.of("email");
 
-    public static Map<String, Object> desensitizeData(
-            Map<String, Object> originalData, boolean shouldClone) {
+    public static Map<String, Object> desensitizeData(Map<String, Object> originalData) {
         Map<String, Object> data = null;
         if (originalData != null) {
-            data = shouldClone ? new HashMap<>(originalData) : new HashMap<>(originalData);
+            data = new HashMap<>(originalData);
         }
 
         if (data != null) {
@@ -29,7 +26,7 @@ public final class Anonymizer {
                 } else if (value instanceof Map<?, ?>) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> valueAsMap = (Map<String, Object>) value;
-                    desensitizeData(valueAsMap, false);
+                    desensitizeData(valueAsMap);
                 } else if (isKeyToBeSuppressed(key)) {
                     data.put(key, "SUPPRESSED");
                 } else if (isKeyToBeCensored(key)) {
@@ -47,7 +44,7 @@ public final class Anonymizer {
             if (value instanceof Map<?, ?>) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> mapValue = (Map<String, Object>) value;
-                desensitizeData(mapValue, false);
+                desensitizeData(mapValue);
             }
         }
     }
@@ -81,7 +78,7 @@ public final class Anonymizer {
     }
 
     private static boolean isKeyToBeSuppressed(String key) {
-        return KEYS_TO_SUPPRESS.stream()
+        return KEYSTOSUPPRESS.stream()
                 .anyMatch(
                         k ->
                                 key.toLowerCase(Locale.getDefault())
@@ -89,7 +86,7 @@ public final class Anonymizer {
     }
 
     private static boolean isKeyToBeCensored(String key) {
-        return KEYS_TO_CENSOR.stream()
+        return KEYSTOCENSOR.stream()
                 .anyMatch(
                         k ->
                                 key.toLowerCase(Locale.getDefault())

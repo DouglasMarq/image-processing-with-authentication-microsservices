@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class AnonymizeLogger {
 
@@ -26,15 +25,14 @@ public class AnonymizeLogger {
                     .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
     private final Logger logger;
-    private final boolean anonymizationOn = true;
 
-    public AnonymizeLogger(Class<?> clazz) {
-        this.logger = LoggerFactory.getLogger(clazz);
+    public AnonymizeLogger(Class<?> className) {
+        this.logger = LoggerFactory.getLogger(className);
     }
 
     private Object anonymize(Object target) {
         try {
-            if (needAnonymize(target)) {
+            if (needToAnonymize(target)) {
                 if (target instanceof List<?>) {
                     return anonymizeArrayParams((List<?>) target);
                 }
@@ -42,10 +40,10 @@ public class AnonymizeLogger {
                     return anonymize((String) target);
                 }
                 Map<String, Object> map = convertObjectToMap(target);
-                return Anonymizer.desensitizeData(map, true);
+                return Anonymizer.desensitizeData(map);
             }
         } catch (Exception e) {
-            logger.debug("error on anonymize {}", target);
+            logger.debug("error on anonymization {}", target);
         }
         return target;
     }
@@ -92,15 +90,12 @@ public class AnonymizeLogger {
         return anonymized;
     }
 
-    private boolean needAnonymize(Object object) {
-        return anonymizationOn
-                && (object == null
-                        || object instanceof String
-                        || object instanceof UUID
-                        || object instanceof Exception
-                        || object instanceof Integer
-                        || object instanceof Long
-                        || object.getClass().isEnum());
+    private boolean needToAnonymize(Object object) {
+        return object == null
+                || object instanceof String
+                || object instanceof Exception
+                || object instanceof Integer
+                || object instanceof Long;
     }
 
     public void info(String msg) {

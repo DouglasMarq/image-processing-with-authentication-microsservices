@@ -30,8 +30,6 @@ public class AwsService {
 
         amazonS3.putObject(bucketName, imagePath, inputStream, metadata);
 
-        log.info("Image uploaded to S3 path: {}", imagePath);
-
         return imagePath;
     }
 }

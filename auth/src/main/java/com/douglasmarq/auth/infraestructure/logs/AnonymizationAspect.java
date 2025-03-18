@@ -7,6 +7,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Aspect
 @Component
 @NoArgsConstructor
@@ -16,10 +18,10 @@ public class AnonymizationAspect {
             "@within(com.douglasmarq.auth.infraestructure.logs.Anonymize) || @annotation(com.douglasmarq.auth.infraestructure.logs.Anonymize)")
     public Object anonymize(ProceedingJoinPoint joinPoint) throws Throwable {
         Object result = joinPoint.proceed(joinPoint.getArgs());
-        if (result instanceof java.util.Map<?, ?>) {
+        if (result instanceof Map<?, ?>) {
             @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> castedMap = (java.util.Map<String, Object>) result;
-            return Anonymizer.desensitizeData(castedMap, false);
+            Map<String, Object> castedMap = (Map<String, Object>) result;
+            return Anonymizer.desensitizeData(castedMap);
         }
         return result;
     }

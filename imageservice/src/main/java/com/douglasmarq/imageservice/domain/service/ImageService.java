@@ -54,14 +54,19 @@ public class ImageService {
             return;
         }
 
+        log.info("Processing image with filter {}", image.getImageFilters());
+
         ProcessedImage processedImage =
                 filterFunction.apply(decodedBytesImage, image.getDimension());
 
         String md5Checksum = ChecksumUtils.calculateMD5Checksum(processedImage.getImage());
 
+        log.info("image MD5 checksum: {}", md5Checksum);
+
         var imageChecksum = imagesRepository.findAllByMd5Checksum(md5Checksum);
 
         if (!imageChecksum.isEmpty()) {
+            log.info("Image already exists in database, setting new image dimension");
             if (imageChecksum.stream()
                     .anyMatch(
                             i ->
@@ -71,6 +76,7 @@ public class ImageService {
                                                             "%dx%d",
                                                             processedImage.getWidth(),
                                                             processedImage.getHeight())))) {
+                log.info("Image already exists with same dimension, skipping");
                 return;
             }
 
@@ -80,12 +86,19 @@ public class ImageService {
                     String.format("%s/%s", imageResult.getUserId(), imageResult.getImageKey()),
                     processedImage,
                     md5Checksum);
+            log.info(
+                    "new image dimension of {}, metadata updated",
+                    String.format("%dx%d", processedImage.getWidth(), processedImage.getHeight()));
             return;
         }
 
         var path = awsService.uploadImage(key, processedImage.getImage());
 
+        log.info("Image uploaded to S3 path: {}", path);
+
         saveImageMetadata(key, path, processedImage, md5Checksum);
+
+        log.info("Image metadata saved to database");
     }
 
     public List<ImagesResponse> getImages(UUID userId) {
@@ -106,6 +119,8 @@ public class ImageService {
 
             imagesList.add(imageBuilder.build());
         }
+
+        log.info("Found {} images for user {}", imagesList.size(), userId);
 
         return imagesList;
     }

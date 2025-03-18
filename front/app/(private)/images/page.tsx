@@ -33,8 +33,6 @@ export default async function Images() {
 
     try {
         response = await axios.request(config);
-
-        console.log(`aaaaaaaaaaaaaa:::: ${JSON.stringify(response.data)}`);
     } catch (err: AxiosResponse) {
         // if (err.response?.status === 401) {
         //     console.log(`refreshToken: ${refreshToken}`)

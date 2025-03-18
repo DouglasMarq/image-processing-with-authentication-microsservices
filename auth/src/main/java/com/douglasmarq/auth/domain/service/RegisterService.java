@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class RegisterService {
-    //    private final Logger logger = LoggerFactory.getLogger(RegisterService.class);
-
     private final AnonymizeLogger logger = new AnonymizeLogger(RegisterService.class);
 
     private final UserRepository userRepository;
@@ -29,6 +27,7 @@ public class RegisterService {
             logger.info("Trying to register user {}", request.getEmail());
 
             if (!request.getPassword().equals(request.getConfirmPassword())) {
+                logger.error("password does not match");
                 throw new RegisterApiException("password does not match", HttpStatus.BAD_REQUEST);
             }
 
@@ -41,9 +40,11 @@ public class RegisterService {
 
             userRepository.save(userBuilder.build());
 
+            logger.info("User {} registered successfully", request.getEmail());
+
             emailService.sendWelcomeEmail(request.getEmail());
         } catch (DataIntegrityViolationException e) {
-            logger.error("Error registering user", e);
+            logger.error("Error registering user, probably e-mail already registered");
             throw new RegisterApiException("e-mail already registered", HttpStatus.CONFLICT);
         } catch (RegisterApiException e) {
             throw e;

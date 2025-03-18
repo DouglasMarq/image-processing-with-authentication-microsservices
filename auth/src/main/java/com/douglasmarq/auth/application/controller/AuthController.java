@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/auth")
 @AllArgsConstructor
 @Tag(name = "Authentication", description = "Authentication API")
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -38,6 +40,8 @@ public class AuthController {
     @ApiResponse(responseCode = "400", description = "User not found or password is incorrect")
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody UserAuthRequest body) {
+        log.info("Receiving a new request to authenticate user.");
+
         return ResponseEntity.ok(authService.authenticate(body.getEmail(), body.getPassword()));
     }
 
@@ -54,6 +58,7 @@ public class AuthController {
     @ApiResponse(responseCode = "401", description = "Invalid refresh token")
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(@RequestParam String refreshToken) {
+        log.info("Receiving a new request to refresh token.");
         return ResponseEntity.ok(authService.refresh(refreshToken));
     }
 }

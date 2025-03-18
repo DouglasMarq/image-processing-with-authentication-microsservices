@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @RequestMapping("/v1/images")
 @AllArgsConstructor
 @Tag(name = "Image", description = "Image management APIs")
+@Slf4j
 public class ImagesController {
 
     private final ImageService imageService;
@@ -43,6 +45,7 @@ public class ImagesController {
             })
     @GetMapping
     public ResponseEntity<List<ImagesResponse>> getImages(@RequestParam UUID userId) {
+        log.info("Getting images for userId: {}", userId);
         return ResponseEntity.ok(imageService.getImages(userId));
     }
 }

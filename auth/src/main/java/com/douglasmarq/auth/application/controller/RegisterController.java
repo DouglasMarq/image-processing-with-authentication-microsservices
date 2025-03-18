@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/register")
 @AllArgsConstructor
 @Tag(name = "Registration", description = "User Registration API")
+@Slf4j
 public class RegisterController {
     private final RegisterService registerService;
 
@@ -33,6 +35,8 @@ public class RegisterController {
     @ApiResponse(responseCode = "409", description = "User exists")
     @PostMapping
     public ResponseEntity register(@Valid @RequestBody RegisterUserRequest request) {
+        log.info("Receiving a new request to register user.");
+
         registerService.register(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
