@@ -10,6 +10,7 @@ import com.douglasmarq.auth.domain.dto.RegisterUserRequest;
 import com.douglasmarq.auth.domain.exception.RegisterApiException;
 import com.douglasmarq.auth.domain.repository.UserRepository;
 import com.douglasmarq.auth.domain.service.EmailService;
+import com.douglasmarq.auth.domain.service.PasswordService;
 import com.douglasmarq.auth.domain.service.RegisterService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,8 @@ public class RegisterControllerTestIT {
 
     @Mock private EmailService emailService;
 
+    @Mock private PasswordService passwordService;
+
     private RegisterService registerService;
 
     private RegisterController registerController;
@@ -48,7 +51,7 @@ public class RegisterControllerTestIT {
     }
 
     private RegisterService buildRegisterService() {
-        return new RegisterService(userRepository, emailService);
+        return new RegisterService(userRepository, emailService, passwordService);
     }
 
     private RegisterController buildRegisterController(RegisterService registerService) {
@@ -90,6 +93,8 @@ public class RegisterControllerTestIT {
     void shouldThrowWhenUserExists() {
         RegisterUserRequest request = createValidRequest();
         Users existingUser = createValidUser();
+
+        when(passwordService.encode(existingUser.getPassword())).thenReturn(existingUser.getPassword());
 
         when(userRepository.save(existingUser))
                 .thenThrow(new DataIntegrityViolationException("User already exists"));

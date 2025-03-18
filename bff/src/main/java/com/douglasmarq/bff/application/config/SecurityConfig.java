@@ -32,7 +32,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authz ->
-                        authz.requestMatchers("/graphql", "/graphiql/**")
+                                authz.requestMatchers("/graphql", "/graphiql/**")
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())

@@ -11,6 +11,7 @@ import com.douglasmarq.auth.domain.dto.UserAuthRequest;
 import com.douglasmarq.auth.domain.dto.UserToken;
 import com.douglasmarq.auth.domain.repository.UserRepository;
 import com.douglasmarq.auth.domain.service.AuthService;
+import com.douglasmarq.auth.domain.service.PasswordService;
 import com.douglasmarq.auth.infraestructure.utils.JwtUtil;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,8 @@ public class AuthControllerTestIT {
 
     @Mock private JwtUtil jwtUtil;
 
+    @Mock private PasswordService passwordService;
+
     private AuthService authService;
 
     private AuthController authController;
@@ -51,7 +54,7 @@ public class AuthControllerTestIT {
     }
 
     private AuthService buildAuthService() {
-        return new AuthService(userRepository, jwtUtil);
+        return new AuthService(userRepository, jwtUtil, passwordService);
     }
 
     private Users createValidUser() {
@@ -94,6 +97,7 @@ public class AuthControllerTestIT {
         when(jwtUtil.generateRefreshToken(
                         validUser.getEmail(), validUser.getId(), validUser.getPlan().toString()))
                 .thenReturn(refreshToken);
+        when(passwordService.decode(eq(validUser.getPassword()), anyString())).thenReturn(true);
 
         ResponseEntity<TokenResponse> response = authController.login(authRequest);
 

@@ -19,6 +19,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    private final PasswordService passwordService;
 
     public TokenResponse authenticate(String email, String password) {
         var user = userRepository.findByEmail(email);
@@ -30,7 +31,7 @@ public class AuthService {
 
         var userResult = user.get();
 
-        if (userResult.getPassword().equals(password)) {
+        if (passwordService.decode(password, userResult.getPassword())) {
             String accessToken =
                     jwtUtil.generateAccessToken(
                             userResult.getEmail(),

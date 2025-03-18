@@ -28,6 +28,8 @@ public class AuthServiceTest {
 
     @Mock private JwtUtil jwtUtil;
 
+    @Mock private PasswordService passwordService;
+
     @InjectMocks private AuthService authService;
 
     private final String accessToken = "mock-access-token";
@@ -56,6 +58,7 @@ public class AuthServiceTest {
         when(jwtUtil.generateRefreshToken(
                         validUser.getEmail(), validUser.getId(), validUser.getPlan().toString()))
                 .thenReturn(refreshToken);
+        when(passwordService.decode(eq(validUser.getPassword()), anyString())).thenReturn(true);
 
         TokenResponse result =
                 authService.authenticate(validUser.getEmail(), validUser.getPassword());
@@ -95,9 +98,10 @@ public class AuthServiceTest {
     @DisplayName("Should Throw Exception when Password is Invalid")
     void shouldThrowExceptionWhenPasswordIsInvalid() {
         var validUser = createValidUser();
+        String wrongPassword = "wrongPassword";
 
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Optional.of(validUser));
-        String wrongPassword = "wrongPassword";
+        when(passwordService.decode(eq(wrongPassword), eq(validUser.getPassword()))).thenReturn(false);
 
         RuntimeException exception =
                 assertThrows(

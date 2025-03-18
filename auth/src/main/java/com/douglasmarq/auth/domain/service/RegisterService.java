@@ -22,6 +22,7 @@ public class RegisterService {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final PasswordService passwordService;
 
     public void register(RegisterUserRequest request) {
         try {
@@ -35,7 +36,7 @@ public class RegisterService {
                     Users.builder()
                             .name(request.getName())
                             .email(request.getEmail())
-                            .password(request.getPassword())
+                            .password(passwordService.encode(request.getPassword()))
                             .plan(PlanType.BASIC);
 
             userRepository.save(userBuilder.build());

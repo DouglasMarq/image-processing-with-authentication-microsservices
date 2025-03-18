@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: AuthService
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/database}
+    username: ${SPRING_DATASOURCE_USERNAME:username}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximumPoolSize: 5
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+          fetch_size: 100
+        temp:
+          use_jdbc_metadata_defaults: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    disable-swagger-default-url: true
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:api_key}
+  sender: ${EMAIL_SENDER:douglas.marq.alves@outlook.com}

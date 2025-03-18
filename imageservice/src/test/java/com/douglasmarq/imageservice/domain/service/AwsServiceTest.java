@@ -1,7 +1,13 @@
 package com.douglasmarq.imageservice.domain.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,26 +20,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.InputStream;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AwsServiceTest {
-    @Mock
-    private AmazonS3 amazonS3;
+    @Mock private AmazonS3 amazonS3;
 
-    @InjectMocks
-    private AwsService awsService;
+    @InjectMocks private AwsService awsService;
 
-    @Captor
-    private ArgumentCaptor<InputStream> inputStreamCaptor;
+    @Captor private ArgumentCaptor<InputStream> inputStreamCaptor;
 
-    @Captor
-    private ArgumentCaptor<ObjectMetadata> metadataCaptor;
+    @Captor private ArgumentCaptor<ObjectMetadata> metadataCaptor;
 
     private final String bucketName = "test-bucket";
 
@@ -50,11 +46,12 @@ class AwsServiceTest {
 
         String result = awsService.uploadImage(key, imageData);
 
-        verify(amazonS3).putObject(
-                eq(bucketName),
-                argThat(path -> path.startsWith(key + "/") && path.endsWith(".jpg")),
-                inputStreamCaptor.capture(),
-                metadataCaptor.capture());
+        verify(amazonS3)
+                .putObject(
+                        eq(bucketName),
+                        argThat(path -> path.startsWith(key + "/") && path.endsWith(".jpg")),
+                        inputStreamCaptor.capture(),
+                        metadataCaptor.capture());
 
         ObjectMetadata metadata = metadataCaptor.getValue();
         assertEquals(imageData.length, metadata.getContentLength());
@@ -73,11 +70,9 @@ class AwsServiceTest {
 
         awsService.uploadImage(key, imageData);
 
-        verify(amazonS3).putObject(
-                eq(bucketName),
-                any(),
-                any(InputStream.class),
-                any(ObjectMetadata.class));
+        verify(amazonS3)
+                .putObject(
+                        eq(bucketName), any(), any(InputStream.class), any(ObjectMetadata.class));
     }
 
     @Test
@@ -88,11 +83,7 @@ class AwsServiceTest {
 
         awsService.uploadImage(key, imageData);
 
-        verify(amazonS3).putObject(
-                any(),
-                any(),
-                any(InputStream.class),
-                metadataCaptor.capture());
+        verify(amazonS3).putObject(any(), any(), any(InputStream.class), metadataCaptor.capture());
 
         ObjectMetadata metadata = metadataCaptor.getValue();
         assertEquals(imageData.length, metadata.getContentLength());

@@ -1,7 +1,13 @@
 package com.douglasmarq.imageservice.domain.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.douglasmarq.imageservice.domain.ImageFiltersEnum;
 import com.douglasmarq.imageservice.domain.dto.ImageOptions;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,19 +18,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class KafkaServiceTest {
 
-    @Mock
-    private ImageService imageService;
+    @Mock private ImageService imageService;
 
-    @InjectMocks
-    private KafkaService kafkaService;
+    @InjectMocks private KafkaService kafkaService;
 
     private String testKey;
     private ImageOptions testImageOptions;
@@ -48,12 +47,17 @@ public class KafkaServiceTest {
 
     @Test
     @DisplayName("When image service throws exception, should propagate exception")
-    void testConsumeMessageWhenImageServiceThrowsExceptionShouldPropagateException() throws IOException {
-        doThrow(new IOException("Processing error")).when(imageService).processImage(anyString(), any(ImageOptions.class));
+    void testConsumeMessageWhenImageServiceThrowsExceptionShouldPropagateException()
+            throws IOException {
+        doThrow(new IOException("Processing error"))
+                .when(imageService)
+                .processImage(anyString(), any(ImageOptions.class));
 
-        assertThrows(IOException.class, () -> {
-            kafkaService.consumeMessage(testKey, testImageOptions);
-        });
+        assertThrows(
+                IOException.class,
+                () -> {
+                    kafkaService.consumeMessage(testKey, testImageOptions);
+                });
 
         verify(imageService, times(1)).processImage(eq(testKey), eq(testImageOptions));
     }

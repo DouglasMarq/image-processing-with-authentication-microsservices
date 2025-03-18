@@ -1,6 +1,12 @@
 package com.douglasmarq.bff.domain.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.douglasmarq.bff.domain.dto.ImageOptionsRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,25 +23,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class KafkaServiceTest {
 
     private static final String TEST_KAFKA_TOPIC = "test-topic";
     private static final String TEST_KEY = "test-key";
 
-    @Mock
-    private KafkaTemplate<String, ImageOptionsRequest> kafkaTemplate;
+    @Mock private KafkaTemplate<String, ImageOptionsRequest> kafkaTemplate;
 
-    @InjectMocks
-    private KafkaService kafkaService;
+    @InjectMocks private KafkaService kafkaService;
 
-    @Captor
-    private ArgumentCaptor<ImageOptionsRequest> messageCaptor;
+    @Captor private ArgumentCaptor<ImageOptionsRequest> messageCaptor;
 
     @BeforeEach
     void setUp() {
@@ -49,11 +47,13 @@ public class KafkaServiceTest {
         ImageOptionsRequest request2 = new ImageOptionsRequest("base64-content-2", null, 2.0f);
         List<ImageOptionsRequest> requests = Arrays.asList(request1, request2);
 
-        when(kafkaTemplate.send(anyString(), anyString(), any(ImageOptionsRequest.class))).thenReturn(null);
+        when(kafkaTemplate.send(anyString(), anyString(), any(ImageOptionsRequest.class)))
+                .thenReturn(null);
 
         kafkaService.sendBatchMessages(TEST_KEY, requests);
 
-        verify(kafkaTemplate, times(2)).send(eq(TEST_KAFKA_TOPIC), eq(TEST_KEY), messageCaptor.capture());
+        verify(kafkaTemplate, times(2))
+                .send(eq(TEST_KAFKA_TOPIC), eq(TEST_KEY), messageCaptor.capture());
         List<ImageOptionsRequest> capturedMessages = messageCaptor.getAllValues();
 
         assertEquals(2, capturedMessages.size());
@@ -67,7 +67,8 @@ public class KafkaServiceTest {
         ImageOptionsRequest request = new ImageOptionsRequest("base64-content", null, 1.0f);
         List<ImageOptionsRequest> requests = Collections.singletonList(request);
 
-        when(kafkaTemplate.send(anyString(), anyString(), any(ImageOptionsRequest.class))).thenReturn(null);
+        when(kafkaTemplate.send(anyString(), anyString(), any(ImageOptionsRequest.class)))
+                .thenReturn(null);
 
         kafkaService.sendBatchMessages(TEST_KEY, requests);
 
@@ -81,7 +82,8 @@ public class KafkaServiceTest {
 
         kafkaService.sendBatchMessages(TEST_KEY, emptyList);
 
-        verify(kafkaTemplate, never()).send(anyString(), anyString(), any(ImageOptionsRequest.class));
+        verify(kafkaTemplate, never())
+                .send(anyString(), anyString(), any(ImageOptionsRequest.class));
     }
 
     @Test
@@ -93,6 +95,7 @@ public class KafkaServiceTest {
 
         kafkaService.sendBatchMessages(customKey, requests);
 
-        verify(kafkaTemplate, times(1)).send(eq(TEST_KAFKA_TOPIC), eq(customKey), any(ImageOptionsRequest.class));
+        verify(kafkaTemplate, times(1))
+                .send(eq(TEST_KAFKA_TOPIC), eq(customKey), any(ImageOptionsRequest.class));
     }
 }

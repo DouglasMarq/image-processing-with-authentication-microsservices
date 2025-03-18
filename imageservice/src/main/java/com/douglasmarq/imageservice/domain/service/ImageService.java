@@ -62,7 +62,6 @@ public class ImageService {
             return;
         }
 
-
         ProcessedImage processedImage =
                 filterFunction.apply(decodedBytesImage, image.getDimension());
 

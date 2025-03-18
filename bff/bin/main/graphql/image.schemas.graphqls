@@ -1,0 +1,23 @@
+enum ImageFiltersEnum {
+    GRAYSCALE
+    BLUR
+    SHARPEN
+}
+
+input ImageOptionsRequestInput {
+    base64Content: String
+    imageFilters: ImageFiltersEnum
+    dimension: Float
+}
+
+type ImageResponse {
+    url: String
+}
+
+type Mutation {
+    uploadImages(imagesOpts: [ImageOptionsRequestInput!]!): Boolean
+}
+
+type Query {
+    getImages: [ImageResponse]
+}
