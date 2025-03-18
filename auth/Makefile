@@ -8,7 +8,10 @@ format:
 format/check:
 	$(GRADLE) spotlessCheck
 
-build:
+clean:
+	$(GRADLE) clean
+
+build: clean test
 	$(GRADLE) build -x test -x spotlessCheck
 
 build/docker: build

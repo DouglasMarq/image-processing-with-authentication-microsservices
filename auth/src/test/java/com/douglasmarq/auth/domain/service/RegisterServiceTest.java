@@ -28,6 +28,8 @@ public class RegisterServiceTest {
 
     @Mock private AnonymizeLogger logger;
 
+    @Mock private PasswordService passwordService;
+
     @InjectMocks private RegisterService registerService;
 
     private RegisterUserRequest validRequest;

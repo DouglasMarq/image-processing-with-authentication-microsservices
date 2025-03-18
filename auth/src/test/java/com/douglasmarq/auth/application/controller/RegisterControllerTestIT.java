@@ -94,7 +94,8 @@ public class RegisterControllerTestIT {
         RegisterUserRequest request = createValidRequest();
         Users existingUser = createValidUser();
 
-        when(passwordService.encode(existingUser.getPassword())).thenReturn(existingUser.getPassword());
+        when(passwordService.encode(existingUser.getPassword()))
+                .thenReturn(existingUser.getPassword());
 
         when(userRepository.save(existingUser))
                 .thenThrow(new DataIntegrityViolationException("User already exists"));

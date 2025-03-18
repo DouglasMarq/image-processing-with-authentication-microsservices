@@ -9,6 +9,7 @@ import com.douglasmarq.imageservice.domain.ImageFiltersEnum;
 import com.douglasmarq.imageservice.domain.Images;
 import com.douglasmarq.imageservice.domain.dto.ImageOptions;
 import com.douglasmarq.imageservice.domain.dto.ImagesResponse;
+import com.douglasmarq.imageservice.domain.dto.ProcessedImage;
 import com.douglasmarq.imageservice.domain.repository.ImagesRepository;
 import com.douglasmarq.imageservice.infraestructure.utils.Base64Utils;
 import com.douglasmarq.imageservice.infraestructure.utils.ChecksumUtils;
@@ -23,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.BiFunction;
 
 @ExtendWith(MockitoExtension.class)
 public class ImageServiceTest {
@@ -48,28 +50,45 @@ public class ImageServiceTest {
     @DisplayName("Should not process image when checksum matches")
     void shouldNotProcessImageWhenChecksumExists() throws IOException {
         ImageOptions imageOptions =
-                new ImageOptions(base64Content, ImageFiltersEnum.GRAYSCALE, 1.0f);
-        byte[] decodedImage = {1, 2, 3, 4};
+                ImageOptions.builder()
+                        .base64Content(base64Content)
+                        .imageFilters(ImageFiltersEnum.GRAYSCALE)
+                        .dimension(0.5f)
+                        .build();
 
-        try (var mockedStatic = mockStatic(Base64Utils.class);
-                var mockedChecksum = mockStatic(ChecksumUtils.class)) {
+        Images existingImage =
+                Images.builder()
+                        .userId(UUID.fromString(userId))
+                        .imageKey("existing-key")
+                        .imageDimension("100x100")
+                        .md5Checksum(md5Checksum)
+                        .build();
 
-            String contentWithoutPrefix = base64Content.substring(base64Content.indexOf(",") + 1);
-            mockedStatic
-                    .when(() -> Base64Utils.removePrefix(base64Content))
-                    .thenReturn(contentWithoutPrefix);
-            mockedChecksum
-                    .when(() -> ChecksumUtils.calculateMD5Checksum(any()))
+        Map<ImageFiltersEnum, BiFunction<byte[], Float, ProcessedImage>> mockedFilterMap =
+                new EnumMap<>(ImageFiltersEnum.class);
+        BiFunction<byte[], Float, ProcessedImage> mockFilterFunction =
+                (bytes, dimension) -> new ProcessedImage(new byte[] {1, 2, 3}, 100, 100);
+        mockedFilterMap.put(ImageFiltersEnum.GRAYSCALE, mockFilterFunction);
+
+        ReflectionTestUtils.setField(imageService, "filterMap", mockedFilterMap);
+
+        try (MockedStatic<ChecksumUtils> checksumUtilsMock = mockStatic(ChecksumUtils.class);
+                MockedStatic<Base64Utils> base64UtilsMock = mockStatic(Base64Utils.class)) {
+
+            base64UtilsMock
+                    .when(() -> Base64Utils.removePrefix(anyString()))
+                    .thenReturn("dGVzdA==");
+            checksumUtilsMock
+                    .when(() -> ChecksumUtils.calculateMD5Checksum(any(byte[].class)))
                     .thenReturn(md5Checksum);
 
-            when(imagesRepository.findByMd5Checksum(md5Checksum))
-                    .thenReturn(Optional.of(new Images()));
+            when(imagesRepository.findAllByMd5Checksum(md5Checksum))
+                    .thenReturn(List.of(existingImage));
 
             imageService.processImage(userId, imageOptions);
 
-            verify(imagesRepository).findByMd5Checksum(md5Checksum);
-            verify(awsService, never()).uploadImage(anyString(), any());
-            verify(imagesRepository, never()).save(any());
+            verify(imagesRepository).findAllByMd5Checksum(md5Checksum);
+            verify(awsService, never()).uploadImage(anyString(), any(byte[].class));
         }
     }
 

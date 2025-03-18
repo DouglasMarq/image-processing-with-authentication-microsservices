@@ -101,7 +101,8 @@ public class AuthServiceTest {
         String wrongPassword = "wrongPassword";
 
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Optional.of(validUser));
-        when(passwordService.decode(eq(wrongPassword), eq(validUser.getPassword()))).thenReturn(false);
+        when(passwordService.decode(eq(wrongPassword), eq(validUser.getPassword())))
+                .thenReturn(false);
 
         RuntimeException exception =
                 assertThrows(

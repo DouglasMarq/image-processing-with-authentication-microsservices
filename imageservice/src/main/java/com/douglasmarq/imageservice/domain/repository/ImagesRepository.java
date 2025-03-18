@@ -15,7 +15,7 @@ public interface ImagesRepository
         extends JpaRepository<Images, UUID>, JpaSpecificationExecutor<Images> {
     Optional<Images> findById(@NotNull UUID id);
 
-    Optional<Images> findByMd5Checksum(@NotNull String checksum);
+    List<Images> findAllByMd5Checksum(@NotNull String checksum);
 
     List<Images> findAllByUserId(@NotNull UUID userId);
 }

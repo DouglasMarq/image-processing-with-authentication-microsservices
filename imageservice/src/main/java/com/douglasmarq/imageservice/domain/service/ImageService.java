@@ -47,14 +47,6 @@ public class ImageService {
         byte[] decodedBytesImage =
                 Base64.getDecoder().decode(Base64Utils.removePrefix(image.getBase64Content()));
 
-        String md5Checksum = ChecksumUtils.calculateMD5Checksum(decodedBytesImage);
-
-        var imageChecksum = imagesRepository.findByMd5Checksum(md5Checksum);
-
-        if (imageChecksum.isPresent()) {
-            return;
-        }
-
         BiFunction<byte[], Float, ProcessedImage> filterFunction =
                 filterMap.get(image.getImageFilters());
 
@@ -64,6 +56,32 @@ public class ImageService {
 
         ProcessedImage processedImage =
                 filterFunction.apply(decodedBytesImage, image.getDimension());
+
+        String md5Checksum = ChecksumUtils.calculateMD5Checksum(processedImage.getImage());
+
+        var imageChecksum = imagesRepository.findAllByMd5Checksum(md5Checksum);
+
+        if (!imageChecksum.isEmpty()) {
+            if (imageChecksum.stream()
+                    .anyMatch(
+                            i ->
+                                    i.getImageDimension()
+                                            .equals(
+                                                    String.format(
+                                                            "%dx%d",
+                                                            processedImage.getWidth(),
+                                                            processedImage.getHeight())))) {
+                return;
+            }
+
+            var imageResult = imageChecksum.getFirst();
+            saveImageMetadata(
+                    key,
+                    String.format("%s/%s", imageResult.getUserId(), imageResult.getImageKey()),
+                    processedImage,
+                    md5Checksum);
+            return;
+        }
 
         var path = awsService.uploadImage(key, processedImage.getImage());
 

@@ -11,16 +11,13 @@ format/check:
 clean:
 	$(GRADLE) clean
 
-build: clean
+build: clean test
 	$(GRADLE) build
 	$(GRADLE) spotlessCheck
 
 build/docker: build
 	docker build -t douglasmarq/images-service:latest .
 
-test/unitTest:
+test:
 	./gradlew test
-
-testIntegration:
-	./gradlew integrationTest -x test
 
